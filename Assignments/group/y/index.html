@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin_view
+    </title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/10.5.0/firebase-app-compat.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/10.5.0/firebase-auth-compat.js"></script>
+    <script defer src="/__/firebase/10.5.0/firebase-database-compat.js"></script>
+    <script defer src="/__/firebase/10.5.0/firebase-firestore-compat.js"></script>
+    <script defer src="/__/firebase/10.5.0/firebase-functions-compat.js"></script>
+    <script defer src="/__/firebase/10.5.0/firebase-messaging-compat.js"></script>
+    <script defer src="/__/firebase/10.5.0/firebase-storage-compat.js"></script>
+    <script defer src="/__/firebase/10.5.0/firebase-analytics-compat.js"></script>
+    <script defer src="/__/firebase/10.5.0/firebase-remote-config-compat.js"></script>
+    <script defer src="/__/firebase/10.5.0/firebase-performance-compat.js"></script>
+    <!-- 
+      initialize the SDK after all desired features are loaded, set useEmulator to false
+      to avoid connecting the SDK to running emulators.
+    -->
+    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+    <style>
+      /* Reset some default styles for the page */
+      body, ul {
+          margin: 0;
+          padding: 0;
+      }
+  
+      /* Style for the header/menu bar */
+      header {
+          background-color: #333;
+          color: #fff;
+          text-align: center;
+          padding: 10px 0;
+      }
+  
+      /* Style for the navigation menu */
+      ul.menu {
+          list-style: none;
+          padding: 0;
+      }
+  
+      ul.menu li {
+          display: inline;
+          margin-right: 20px;
+      }
+  
+      ul.menu li a {
+          text-decoration: none;
+          color: #fff;
+      }
+  
+      /* Style for the content area */
+     .content{
+      padding-left: 10px;
+      color: cadetblue;
+     }
+     .dropdown {
+              position: relative;
+              /*display: inline-block;*/
+              float: right;
+              padding-right: 25px;
+          }
+  
+          /* Style for the dropdown content */
+          .dropdown-content {
+              position: absolute;
+              background-color: #f9f9f9;
+              min-width: 160px;
+              box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+              z-index: 1;
+              display: none;
+              left: -100px;
+          }
+  
+          .dropdown:hover .dropdown-content {
+              display: block;
+          }
+          .search-bar {
+              padding: 10px;
+              width: 100%;
+          }
+          .chart-container {
+              flex: 1;
+              display: flex;
+              justify-content: flex-start;
+              align-items: center;
+          }
+          .candidates {
+              background-color: #f9f9f9;
+              padding: 20px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+          }
+  
+          .candidate-item {
+              margin-bottom: 10px;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+          }
+  
+          .candidate-name {
+              font-weight: bold;
+          }
+  
+          .candidate-party {
+              color: #666;
+          }
+          .modal {
+              display: none;
+              position: fixed;
+              z-index: 1;
+              left: 0;
+              top: 0;
+              width: 100%;
+              height: 100%;
+              background-color: rgba(0, 0, 0, 0.5);
+          }
+  
+          .modal-content {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              padding: 20px;
+              background-color: #fff;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              text-align: center;
+          }
+  
+          /* Styles for the form elements */
+          .form-input {
+              margin: 10px 0;
+          }
+  
+          /* Button styles */
+          .btn {
+              background-color: #007bff;
+              color: #fff;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 5px;
+              cursor: pointer;
+          }
+  
+          .btn:hover {
+              background-color: #0056b3;
+          }
+          .edit-candidate {
+              background-color: #007bff;
+              color: #fff;
+              border: none;
+              padding: 5px 10px;
+              border-radius: 5px;
+              cursor: pointer;
+              margin-left: 5px;
+          }
+  
+          .edit-candidate:hover {
+              background-color: #0056b3;
+          }
+  
+          /* Adjust the position of the "Edit" button */
+          .candidate-actions {
+              display: flex;
+              align-items: center;
+              justify-content: flex-end;
+          }
+          /* Adjust the size of the chart */
+          #myPieChart {
+              width: 200px; /* Adjust as needed */
+              height: 200px; /* Adjust as needed */
+          }
+  </style>
+    
+  </head>
+  <header>
+    <ul class="menu">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Services</a></li>
+        <li><a href="#">Portfolio</a></li>
+        <li><a href="#">Contact</a></li>
+    </ul>
+</header>
+<div class="dropdown">
+  <span>Constituency</span>
+  <div class="dropdown-content">
+      <div class="search-bar">
+          <input type="text" id="searchInput" onkeyup="filterItems()" placeholder="Search...">
+      </div>
+      <a href="#">option 1</a>
+      <a href="#">option 2</a>
+      <a href="#">option 3</a>
+  </div>
+</div>
+<div class="content">
+  <h1>Welcome to My Webpage</h1>
+  <p>This is the content of your webpage.</p>
+</div>
+<div class="chart-container">
+  <canvas id="myPieChart" width="200" height="200"></canvas>
+</div>
+<div class="candidates">
+  <div class="candidate-item">
+      <div class="candidate-name">John Doe</div>
+      <div class="candidate-party">Democratic Party</div>
+      <div class="candidate-actions">
+        <button class="edit-candidate">Edit</button>
+    </div>
+  </div>
+  <div class="candidate-item">
+      <div class="candidate-name">Jane Smith</div>
+      <div class="candidate-party">Republican Party</div>
+      <div class="candidate-actions">
+        <button class="edit-candidate">Edit</button>
+    </div>
+  </div>
+  <button id="addCandidateButton">+ Add Candidate</button>
+  <!-- Add more candidate items as needed -->
+</div>
+<div id="myModal" class="modal">
+  <div class="modal-content">
+      <h2>Add Candidate</h2>
+      <input type="text" id="candidateName" class="form-input" placeholder="Candidate Name">
+      <input type="text" id="candidateParty" class="form-input" placeholder="Candidate Party">
+      <button id="submitCandidate" class="btn">Submit</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+  function filterItems() {
+      var input = document.getElementById('searchInput');
+      var filter = input.value.toLowerCase();
+      var dropdownContent = document.querySelector('.dropdown-content');
+      var items = dropdownContent.getElementsByTagName('a');
+
+      for (var i = 0; i < items.length; i++) {
+          var item = items[i];
+          var text = item.textContent.toLowerCase();
+          if (text.includes(filter)) {
+              item.style.display = '';
+          } else {
+              item.style.display = 'none';
+          }
+      }
+
+      // Check if all items are hidden, and if so, hide the dropdown
+      var allHidden = true;
+      for (var i = 0; i < items.length; i++) {
+          if (items[i].style.display !== 'none') {
+              allHidden = false;
+              break;
+          }
+      }
+
+      if (allHidden) {
+          dropdownContent.style.display = 'none';
+      } else {
+          dropdownContent.style.display = 'block';
+      }
+  }
+</script>
+        <!-- Your header/menu bar -->
+    </header>
+    
+    <div class="chart-container">
+        <canvas id="myPieChart"width="200" height="200"></canvas>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Sample data for the pie chart
+            var data = {
+                labels: ['Label 1', 'Label 2', 'Label 3'],
+                datasets: [{
+                    data: [30, 40, 30], // Adjust the data values as needed
+                    backgroundColor: ['red', 'green', 'blue'], // Customize colors
+                }],
+            };
+
+            // Get the canvas element
+            var ctx = document.getElementById('myPieChart').getContext('2d');
+
+            // Create the pie chart
+            var pieChart = new Chart(ctx, {
+    type: 'pie',
+    data: data,
+    options: {
+        responsive: false, // Ensure the chart doesn't scale to fit the container
+        maintainAspectRatio: false, // Prevent maintaining the aspect ratio
+        legend: {
+            labels: {
+                fontSize: 15, // Change the font size to 15 (adjust as needed)
+            },
+        },
+    },
+});
+        });
+    </script>
+    <script>
+      // Get the modal and the button that opens it
+      var modal = document.getElementById("myModal");
+      var addCandidateButton = document.getElementById("addCandidateButton");
+
+      // Get the form elements and submit button
+      var candidateNameInput = document.getElementById("candidateName");
+      var candidatePartyInput = document.getElementById("candidateParty");
+      var submitButton = document.getElementById("submitCandidate");
+
+      // When the user clicks the "Add Candidate" button, open the modal
+      addCandidateButton.onclick = function () {
+          modal.style.display = "block";
+      }
+
+      // When the user clicks the "Submit" button, add a new candidate to the list
+      submitButton.onclick = function () {
+          var candidateName = candidateNameInput.value;
+          var candidateParty = candidatePartyInput.value;
+
+          if (candidateName && candidateParty) {
+              // Create a new candidate item
+              var newCandidate = document.createElement('div');
+              newCandidate.classList.add('candidate-item');
+
+              // Create candidate name and party elements
+              var candidateNameElement = document.createElement('div');
+              candidateNameElement.classList.add('candidate-name');
+              candidateNameElement.textContent = candidateName;
+
+              var candidatePartyElement = document.createElement('div');
+              candidatePartyElement.classList.add('candidate-party');
+              candidatePartyElement.textContent = candidateParty;
+
+              // Append name and party elements to the new candidate item
+              newCandidate.appendChild(candidateNameElement);
+              newCandidate.appendChild(candidatePartyElement);
+
+              // Append the new candidate item to the candidate list
+              document.getElementById('candidateList').appendChild(newCandidate);
+
+              // Clear input fields
+              candidateNameInput.value = "";
+              candidatePartyInput.value = "";
+
+              // Close the modal
+              modal.style.display = "none";
+          }
+      }
+
+      // When the user clicks outside the modal, close it
+      window.onclick = function (event) {
+          if (event.target === modal) {
+              modal.style.display = "none";
+          }
+      }
+  </script>
+</body>
+</html>
+
+</body>
+</html>
+
